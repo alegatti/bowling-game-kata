@@ -60,22 +60,28 @@
                     method: 'GET',
                     mode: 'cors'
                 }).then(res => res.json())
-                .then(res => {
-                    this.games = res.data.map(game => ({
-                        player: game.player_name,
-                        frames: JSON.parse(game.frames),
-                        date: new Date(game.play_date)
-                    }));
-                }).catch(err => {
-                    console.log(err, err.stack);
-                    alert('Error while getting history');
-                });
+                    .then(res => {
+                        this.games = res.data.map(game => ({
+                            player: game.player_name,
+                            frames: JSON.parse(game.frames),
+                            date: new Date(game.play_date)
+                        }));
+                    }).catch(err => {
+                        console.log(err, err.stack);
+                        alert('Error while getting history');
+                    });
             }
 
             _formatDate(date) {
+                function format(x) {
+                    //debugger;
+                    if (x < 10)
+                        return '0' + x;
+                    return x;
+                }
                 try {
                     return date.getDay() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear()
-                        + ' ' + date.getHours() + ':' + date.getMinutes();
+                        + ' ' + format(date.getHours()) + ':' + format(date.getMinutes());
                 } catch (err) {
                     return date;
                 }
