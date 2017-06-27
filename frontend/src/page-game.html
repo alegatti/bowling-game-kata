@@ -1,0 +1,231 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="behaviors/page-behavior.html">
+<link rel="import" href="game/bgk-game.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="page-game">
+    <template>
+        <style include="shared-styles">
+             :host {
+                display: block;
+                padding: 10px 20px;
+            }
+
+            #slider-container,
+            #buttons-container {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-around;
+                margin: auto;
+                margin-top: 16px;
+                max-width: 500px;
+            }
+
+            #slider-container paper-slider {
+                display: inline-block;
+            }
+        </style>
+        <div class="card">
+            <h1>Board - <span>[[username]]</span></h1>
+            <bgk-game id="game" frames="[[frames]]" pins="[[pins]]"></bgk-game>
+            <div id="slider-container">
+                <span>Knock Down <span>{{knockedDownPins}}</span> pins </span>
+                <paper-slider pin min="0" max="[[remainingPins]]" value="{{knockedDownPins}}"></paper-slider>
+            </div>
+            <div id="buttons-container">
+                <paper-button on-click="_resetGame" raised noink>
+                    Reset
+                </paper-button>
+                <paper-button on-click="_random" raised noink>
+                    Random
+                </paper-button>
+                <paper-button on-click="_throwBall" raised noink>
+                    Throw ball!
+                </paper-button>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        class PageGame extends Polymer.mixinBehaviors([PageBehavior], Polymer.Element) {
+            static get is() {
+                return 'page-game';
+            }
+
+            static get properties() {
+                return {
+                    remainingPins: {
+                        type: Number,
+                        notify: true
+                    },
+                    knockedDownPins: {
+                        type: Number,
+                        notify: true,
+                        value: 0
+                    },
+                    frames: {
+                        type: Array,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    throws: {
+                        type: Array,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    username: {
+                        type: String,
+                        notify: true,
+                        reflectToAttribute: true
+                    },
+                    _maxFrames: {
+                        type: Number,
+                        value: 10
+                    },
+                    pins: {
+                        type: Number,
+                        reflectToAttribute: true,
+                        value: 10
+                    }
+                }
+            }
+
+            constructor() {
+                super();
+                this.pageTitle = 'Game';
+                this.pageTag = 'game';
+            }
+
+            ready() {
+                super.ready();
+                this._resetGame();
+            }
+
+            _resetGame() {
+                const frames = [];
+                for (let i = 0; i < this._maxFrames; i++)
+                    frames.push({
+                        startPoints: 0,
+                        throws: [],
+                        points: '-'
+                    });
+                this.frames = frames;
+                this.throws = [];
+                // this.throws = [1, 4, 4, 5, 6, 4, 5, 5, 10, 0, 1, 7, 3, 6, 4, 10, 2, 8];
+                // this.throws = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+                this.currentFrame = 0;
+                this.remainingPins = this.pins;
+                this.knockedDownPins = 0;
+                this.$['buttons-container'].children[1].disabled = false;
+                this.$['buttons-container'].children[2].disabled = false;
+            }
+
+            _throwBall() {
+                console.log('Throw ball ', this.knockedDownPins)
+
+                // Store throw
+                this.throws.push(this.knockedDownPins);
+
+                let frameIndex = 0;
+                let frameThrows = [];
+                let frameRelativePoints = 0;
+                let totalPoints = 0;
+                let goToNextFrame = false;
+                this.remainingPins = this.pins;
+
+                for (let i = 0; i < this.throws.length; i++) {
+                    frameThrows.push(this.throws[i]);
+                    frameRelativePoints += this.throws[i];
+                    totalPoints += this.throws[i];
+
+                    this.remainingPins -= this.throws[i];
+
+                    if (frameIndex == this._maxFrames - 1) { // Last Frame
+                        if (frameThrows.length == 2 && frameRelativePoints != 10) {
+                            goToNextFrame = true;
+                        }
+                        if (frameThrows.length == 3) {
+                            goToNextFrame = true;
+                        }
+                        if (frameRelativePoints == 10)
+                            frameRelativePoints = 0;
+                    } else { // Not Last Frame
+
+                        // Handle Strike and Spare
+                        if (frameRelativePoints == 10) {
+
+                            // Strike, bonus = 2 throw
+                            if (frameThrows.length == 1) {
+                                if (i + 1 < this.throws.length) totalPoints += this.throws[i + 1];
+                                if (i + 2 < this.throws.length) totalPoints += this.throws[i + 2];
+                            }
+
+                            // Spare, bonus = 1 throw
+                            if (frameThrows.length == 2) {
+                                if (i + 1 < this.throws.length) totalPoints += this.throws[i + 1];
+                            }
+
+                            goToNextFrame = true;
+                        }
+
+                        if (frameThrows.length == 2) {
+                            goToNextFrame = true;
+                        }
+                    }
+
+                    // Update UI
+                    this.set(`frames.${frameIndex}.throws`, frameThrows.concat([]));
+                    this.set(`frames.${frameIndex}.points`, totalPoints);
+
+                    // Handle next frame
+                    if (goToNextFrame) {
+                        frameThrows = [];
+                        frameIndex++;
+                        frameRelativePoints = 0;
+                        this.remainingPins = this.pins;
+                        goToNextFrame = false;
+
+                        // At the end of the game disable the controls
+                        if (frameIndex >= this._maxFrames) {
+                            this._endGame();
+                        }
+                    }
+                }
+            }
+
+            _random() {
+                this.knockedDownPins = (Math.random() * (this.remainingPins + 1)) | 0
+                this._throwBall();
+            }
+
+            _endGame() {
+                this.$['buttons-container'].children[1].disabled = true;
+                this.$['buttons-container'].children[2].disabled = true;
+                const endpoint = window.bgk.apiUrl + 'save_game.php';
+                const data = new FormData();
+                data.append("player_name", this.username);
+                data.append("frames", JSON.stringify(this.frames));
+                fetch(endpoint, {
+                    method: 'POST',
+                    body: data
+                }).then(res => res.json())
+                    .then(res => {
+                        if (res.status)
+                            alert('Score saved');
+                        else
+                            throw new Error(res.err);
+                    }).catch(err => {
+                        console.log(err, err.stack);
+                        alert(err);
+                    });
+            }
+
+        }
+
+        window.customElements.define(PageGame.is, PageGame);
+    </script>
+</dom-module>

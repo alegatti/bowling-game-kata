@@ -1,0 +1,62 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="behaviors/page-behavior.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="page-login">
+    <template>
+        <style include="shared-styles">
+             :host {
+                display: block;
+                padding: 10px;
+            }
+
+            .card {
+                max-width: 400px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .card h1 {
+                margin-bottom: 0px;
+            }
+        </style>
+
+        <div class="card">
+            <h1>Set username</h1>
+            <paper-input label="Username" value="{{username}}"></paper-input>
+            <!--<div style="text-align:center">
+                <paper-button on-click="setUsername" raised noink>
+                    Set Username
+                </paper-button>
+            </div>-->
+        </div>
+    </template>
+
+    <script>
+        class PageLogin extends Polymer.mixinBehaviors([PageBehavior], Polymer.Element) {
+            static get is() {
+                return 'page-login';
+            }
+
+            static get properties() {
+                return {
+                    username: {
+                        type: String,
+                        notify: true,
+                        reflectToAttribute: true
+                    }
+                }
+            }
+
+            constructor() {
+                super();
+                this.pageTitle = 'Login';
+                this.pageTag = 'login';
+            }
+        }
+
+        window.customElements.define(PageLogin.is, PageLogin);
+    </script>
+</dom-module>

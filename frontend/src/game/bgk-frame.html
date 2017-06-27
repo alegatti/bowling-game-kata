@@ -1,0 +1,142 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="bgk-frame">
+    <template>
+        <style include="shared-styles">
+             :root {
+                --frame-size: 60px;
+            }
+
+             :host {
+                display: inline-block;
+                margin: var(--frame-margin, 1px);
+                padding: 0px;
+            }
+
+            #frame {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                width: var(--frame-size);
+                height: var(--frame-size);
+                border: 1px solid black;
+            }
+
+            #top-row {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                flex: 1;
+            }
+
+            .throw {
+                flex: 1;
+            }
+
+            #top-row .throw:not(:first-child) {
+                border-left: 1px solid black;
+                border-bottom: 1px solid black;
+            }
+
+            #points {
+                flex: 1;
+                font-weight: bold;
+            }
+
+            #points,
+            .throw {
+                /* center numbers verically*/
+                display: flex;
+                align-items: center;
+                justify-content: center
+            }
+        </style>
+
+        <div id="frame">
+            <div id="top-row">
+                <template is="dom-repeat" items="[[_pointsLabels]]" style="display: none;">
+                    <div class="throw">[[item]]</div>
+                </template>
+            </div>
+            <div id="points">[[points]]</div>
+        </div>
+    </template>
+
+    <script>
+        class BgkFrame extends Polymer.Element {
+            static get is() {
+                return 'bgk-frame';
+            }
+
+            static get properties() {
+                return {
+                    throws: {
+                        type: Array,
+                        notify: true,
+                        observer: '_throwsChanged',
+                        reflectToAttribute: true
+                    },
+                    points: {
+                        type: Number,
+                        notify: true,
+                        reflectToAttribute: true,
+                        value: '-'
+                    },
+                    pins: {
+                        type: Number,
+                        reflectToAttribute: true,
+                        value: 10
+                    },
+                    _pointsLabels: {
+                        type: Array,
+                        notify: true
+                    }
+                };
+            }
+
+
+            static get observers() {
+                return [
+                    '_throwsChanged(throws)',
+                ];
+            }
+
+            ready() {
+                super.ready();
+            }
+
+            _throwsChanged(throws) {
+                // console.log('_throwsChanged', throws);
+                let lastRelativePoints = 0;
+                let relativePoints = 0;
+                const labels = [];
+
+                for (let i = 0; i < throws.length; i++) {
+                    lastRelativePoints = relativePoints;
+                    relativePoints += throws[i]
+                    if (relativePoints == this.pins) {
+                        if (lastRelativePoints == 0) { // Strike
+                            if (i == throws.length - 1) labels.push(undefined);
+                            labels.push('X');
+                            this.bonus = 2;
+                        } else { // Spare
+                            labels.push('/');
+                            this.bonus = 1;
+                        }
+                        lastRelativePoints = 0;
+                        relativePoints = 0;
+                    } else {
+                        labels.push(throws[i]);
+                    }
+                }
+
+                if (labels.length == 0) labels.push(undefined); // Add blank space
+                if (labels.length == 1) labels.push(undefined); // Add blank space
+                this._pointsLabels = labels;
+                this.notifyPath('_pointsLabels');
+            }
+        }
+        window.customElements.define(BgkFrame.is, BgkFrame);
+    </script>
+</dom-module>

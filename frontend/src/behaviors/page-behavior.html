@@ -1,0 +1,46 @@
+<script>
+    const PageBehavior = {
+        properties: {
+            pageTitle: {
+                type: String,
+                value: false,
+                notify: true
+            },
+            pageTag: {
+                type: String,
+                value: false,
+                notify: true
+            }
+        },
+
+        created: function () {
+            document.addEventListener('page-changed', event => {
+                if (event.detail.page == this.pageTag) {
+                    this.sendTitleUpdate();
+                    this._onPageShow();
+                }
+            });
+        },
+
+        attached: function () {
+            this.sendTitleUpdate();
+            this._onPageShow();
+        },
+
+        sendTitleUpdate() {
+            document.dispatchEvent(new CustomEvent('change-page-title', {
+                detail: {
+                    title: this.pageTitle
+                }
+            }));
+        },
+
+        _onPageShow() {
+            // console.log('*** _onPageShow', this.pageTitle, this.pageTag);
+        },
+
+        ready: function () {
+            this._onPageShow();
+        }
+    };
+</script>

@@ -1,0 +1,87 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="behaviors/page-behavior.html">
+<link rel="import" href="game/bgk-game.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="page-history">
+    <template>
+        <style include="shared-styles">
+             :host {
+                display: block;
+                padding: 10px 20px;
+            }
+        </style>
+        <iron-ajax auto url="{{endpoint}}" on-response="handleResponse"></iron-ajax>
+        <div id="games">
+            <template is="dom-repeat" items="{{games}}" style="display: none;">
+                <div class="card">
+                    <span>[[item.player]]</span> - <span>[[_formatDate(item.date)]]</span>
+                    <bgk-game frames="[[item.frames]]"></bgk-game>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <script>
+        class PageHistory extends Polymer.mixinBehaviors([PageBehavior], Polymer.Element) {
+            static get is() {
+                return 'page-history';
+            }
+
+            static get properties() {
+                return {
+                    games: {
+                        type: Array,
+                        notify: true
+                    }
+                }
+            }
+
+            constructor() {
+                super();
+                this.pageTitle = 'History';
+                this.pageTag = 'history';
+            }
+
+            ready() {
+                super.ready();
+            }
+
+            _onPageShow() {
+                console.log('History _onPageShow');
+                this._getData();
+            }
+
+            _getData() {
+                const endpoint = window.bgk.apiUrl + 'get_games.php';
+                console.log(endpoint);
+                fetch(endpoint, {
+                    method: 'GET',
+                    mode: 'cors'
+                }).then(res => res.json())
+                .then(res => {
+                    this.games = res.data.map(game => ({
+                        player: game.player_name,
+                        frames: JSON.parse(game.frames),
+                        date: new Date(game.play_date)
+                    }));
+                }).catch(err => {
+                    console.log(err, err.stack);
+                    alert('Error while getting history');
+                });
+            }
+
+            _formatDate(date) {
+                try {
+                    return date.getDay() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear()
+                        + ' ' + date.getHours() + ':' + date.getMinutes();
+                } catch (err) {
+                    return date;
+                }
+            }
+        }
+
+        window.customElements.define(PageHistory.is, PageHistory);
+    </script>
+</dom-module>
