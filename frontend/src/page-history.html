@@ -49,13 +49,12 @@
             }
 
             _onPageShow() {
-                console.log('History _onPageShow');
+                // console.log('History _onPageShow');
                 this._getData();
             }
 
             _getData() {
                 const endpoint = window.bgk.apiUrl + 'get_games.php';
-                console.log(endpoint);
                 fetch(endpoint, {
                     method: 'GET',
                     mode: 'cors'
@@ -74,7 +73,6 @@
 
             _formatDate(date) {
                 function format(x) {
-                    //debugger;
                     if (x < 10)
                         return '0' + x;
                     return x;

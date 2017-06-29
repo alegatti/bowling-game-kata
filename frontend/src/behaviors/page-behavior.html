@@ -1,11 +1,13 @@
 <script>
     const PageBehavior = {
         properties: {
+            // Page title, displayed on the header
             pageTitle: {
                 type: String,
                 value: false,
                 notify: true
             },
+            // Tag used to identify pages when the event 'page-changed' fires
             pageTag: {
                 type: String,
                 value: false,
@@ -27,6 +29,7 @@
             this._onPageShow();
         },
 
+        // Dispatch the event 'change-page-title' that notify the app to change the title in the header
         sendTitleUpdate() {
             document.dispatchEvent(new CustomEvent('change-page-title', {
                 detail: {
@@ -35,12 +38,11 @@
             }));
         },
 
+        // Function call every time a page is shown.
+        // Elements that extends this Behavior can override this function
         _onPageShow() {
-            // console.log('*** _onPageShow', this.pageTitle, this.pageTag);
-        },
-
-        ready: function () {
-            this._onPageShow();
+            ;
         }
+
     };
 </script>

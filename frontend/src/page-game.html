@@ -105,6 +105,7 @@
                 this._resetGame();
             }
 
+            // Reset all the variables to the default values
             _resetGame() {
                 const frames = [];
                 for (let i = 0; i < this._maxFrames; i++)
@@ -115,8 +116,6 @@
                     });
                 this.frames = frames;
                 this.throws = [];
-                // this.throws = [1, 4, 4, 5, 6, 4, 5, 5, 10, 0, 1, 7, 3, 6, 4, 10, 2, 8];
-                // this.throws = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
                 this.currentFrame = 0;
                 this.remainingPins = this.pins;
                 this.knockedDownPins = 0;
@@ -124,6 +123,7 @@
                 this.$['buttons-container'].children[2].disabled = false;
             }
 
+            // Main method with all the game logic
             _throwBall() {
                 console.log('Throw ball ', this.knockedDownPins)
 
@@ -197,14 +197,19 @@
                 }
             }
 
+            // Knock down a random number of pins
             _random() {
                 this.knockedDownPins = (Math.random() * (this.remainingPins + 1)) | 0
                 this._throwBall();
             }
 
+            // Handle the end of the game:
             _endGame() {
+                // Disable buttons
                 this.$['buttons-container'].children[1].disabled = true;
                 this.$['buttons-container'].children[2].disabled = true;
+
+                // Save the game
                 const endpoint = window.bgk.apiUrl + 'save_game.php';
                 const data = new FormData();
                 data.append("player_name", this.username);
