@@ -7,7 +7,7 @@ I didn't do the twitter integration because I did't have enough time (I only had
 
 
 ## Website
-It's hosted on a DigitalOcean VPS. This is the address: [http://188.166.173.144/](http://188.166.173.144/)
+It's hosted on a DigitalOcean VPS. This is the address: [bowling-game-kata.com](http://bowling-game-kata.com)
 
 
 ## Frontend
