@@ -151,8 +151,10 @@
                         if (frameThrows.length == 3) {
                             goToNextFrame = true;
                         }
-                        if (frameRelativePoints == 10)
+                        if (frameRelativePoints == 10) {
                             frameRelativePoints = 0;
+                            this.remainingPins = this.pins;
+                        }
                     } else { // Not Last Frame
 
                         // Handle Strike and Spare
