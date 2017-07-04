@@ -117,7 +117,7 @@
                     relativePoints += throws[i]
                     if (relativePoints == this.pins) {
                         if (lastRelativePoints == 0) { // Strike
-                            if (i == throws.length - 1) labels.push(undefined);
+                            if (i == 0 && throws.length == 1) labels.push(undefined);
                             labels.push('X');
                             this.bonus = 2;
                         } else { // Spare
